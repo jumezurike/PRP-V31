@@ -1,0 +1,98 @@
+name: PRP v3.1 NPS Gate Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  prp-compliance-check:
+    name: PRP v3.1 Compliance Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify NPS gate scripts exist
+        run: |
+          echo "=== PRP v3.1 §30 — NPS Gate Verification ==="
+          if [[ ! -f "scripts/nps_gate.sh" ]]; then
+            echo "ERROR: scripts/nps_gate.sh missing — PRP v3.1 §30 violation"
+            exit 1
+          fi
+          if [[ ! -f "scripts/nps_work_gate.sh" ]]; then
+            echo "ERROR: scripts/nps_work_gate.sh missing — PRP v3.1 §30 violation"
+            exit 1
+          fi
+          echo "✓ NPS gate scripts present"
+
+      - name: Verify NPS-PROTOCOL.md exists
+        run: |
+          if [[ ! -f "docs/NPS-PROTOCOL.md" ]]; then
+            echo "ERROR: docs/NPS-PROTOCOL.md missing — PRP v3.1 §30.5 violation"
+            exit 1
+          fi
+          echo "✓ NPS-PROTOCOL.md present"
+
+      - name: Verify tier directory structure
+        run: |
+          echo "=== Checking tier structure ==="
+          for tier in tier1 tier2 tier3 tier4 tier5; do
+            if [[ ! -d "tiers/$tier" ]]; then
+              echo "ERROR: tiers/$tier directory missing"
+              exit 1
+            fi
+            echo "✓ tiers/$tier present"
+          done
+
+      - name: Verify session report template exists
+        run: |
+          if [[ ! -f "docs/templates/SESSION_REPORT_TEMPLATE.txt" ]]; then
+            echo "ERROR: Session report template missing — PRP v3.1 §7 violation"
+            exit 1
+          fi
+          echo "✓ Session report template present"
+
+      - name: Test NPS gate rejects no-callsign
+        run: |
+          chmod +x scripts/nps_gate.sh
+          echo "Testing: no callsign must be rejected"
+          bash scripts/nps_gate.sh && exit 1 || echo "✓ Correctly rejected (no callsign)"
+
+      - name: Test NPS gate rejects wrong callsign
+        run: |
+          echo "Testing: wrong callsign must be rejected"
+          bash scripts/nps_gate.sh "approved" && exit 1 || echo "✓ Correctly rejected (wrong callsign)"
+          bash scripts/nps_gate.sh "proceed" && exit 1 || echo "✓ Correctly rejected (wrong callsign)"
+          bash scripts/nps_gate.sh "begin" && exit 1 || echo "✓ Correctly rejected (wrong callsign)"
+
+      - name: Test work gate blocks without NPS
+        run: |
+          chmod +x scripts/nps_work_gate.sh
+          echo "Testing: work gate must block without NPS"
+          bash scripts/nps_work_gate.sh echo "should not run" && exit 1 || echo "✓ Correctly blocked"
+
+      - name: Scan for hardcoded secrets (§15.1)
+        run: |
+          echo "=== PRP v3.1 §15.1 — Credential scan ==="
+          if grep -r "password\s*=" . \
+               --include="*.sh" --include="*.py" --include="*.js" \
+               --include="*.ts" --include="*.env" \
+               --exclude-dir=".git" \
+               --exclude-dir="node_modules" \
+               -i 2>/dev/null | grep -v "example\|template\|sample\|test\|#"; then
+            echo "WARNING: Potential hardcoded credentials found — review required"
+          else
+            echo "✓ No hardcoded credentials detected"
+          fi
+
+      - name: PRP compliance summary
+        run: |
+          echo ""
+          echo "╔══════════════════════════════════════════════════════╗"
+          echo "║  PRP v3.1 COMPLIANCE CHECK — PASSED                  ║"
+          echo "║  NPS gate enforced · Tier structure verified          ║"
+          echo "║  Protocol Owner: Josiah Umezurike / LokDon            ║"
+          echo "╚══════════════════════════════════════════════════════╝"

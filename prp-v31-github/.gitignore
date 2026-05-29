@@ -1,0 +1,16 @@
+# NPS gate state — reset each session, not tracked
+.nps_state
+
+# Audit files generated — track them (audit trail)
+# docs/nps-audits/  ← DO NOT ignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log

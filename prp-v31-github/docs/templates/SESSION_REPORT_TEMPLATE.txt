@@ -1,0 +1,108 @@
+# SESSION PROGRESS REPORT TEMPLATE
+# PRP v3.1 §7 | LokDon Development Framework
+# File naming: <INITIALS><DEV/PRO><YYYYMMDD><HHMM>PR.txt
+# Example: JUDEV202605291430PR.txt
+# ============================================================
+# MANDATORY — Every session must produce a progress report.
+# A session without a progress report is incomplete.
+# ============================================================
+
+DEVELOPER/AGENT:
+SESSION DATE:
+SESSION START:
+SESSION END:
+ENVIRONMENT: [ ] DEV  [ ] PRO
+PRP VERSION: v3.1 Final
+
+---
+
+## 1. NPS Completion
+NPS audit file: docs/nps-audits/NPS_AUDIT_YYYYMMDD_HHMM.md
+NPS declared at: [timestamp]
+
+---
+
+## 2. Approved Solution Roadmap
+Approval received: [ ] YES — trigger word used: ________________
+Trigger word: [ ] "approved"  [ ] "proceed"
+Approved by: [name]
+Approval timestamp:
+
+---
+
+## 3. Backup Verification
+Pre-work backup created: [ ] YES  [ ] NO
+Backup path:
+Backup verified readable: [ ] YES  [ ] NO
+Baseline file size recorded: [ ] YES  [ ] NO
+
+---
+
+## 4. Changes Made
+(List every file modified, created, or deleted — linked to approved Solution Roadmap item)
+
+| File | Change Type | Roadmap Item | Notes |
+|------|-------------|--------------|-------|
+|      |             |              |       |
+
+---
+
+## 5. Impact on System Components
+(Describe effect of each change on surrounding components)
+
+---
+
+## 6. Reasoning Behind Changes
+(Why each change was made — must match approved Solution Roadmap)
+
+---
+
+## 7. Prompt Versioning Records (§21.3)
+(All AI prompts used this session — format: PROMPT_YYYYMMDD_HHMM_descriptor)
+
+| Prompt ID | Descriptor | Output produced |
+|-----------|------------|-----------------|
+|           |            |                 |
+
+---
+
+## 8. Test Results
+Unit test coverage: ____% (minimum 80% required — §20.3)
+Critical path coverage: ____% (100% required — §20.3)
+All tests passing: [ ] YES  [ ] NO
+Failing tests: (list)
+
+---
+
+## 9. Security Scan Results (§22.6)
+[ ] Dependency audit run: PASS / FAIL / FINDINGS:
+[ ] SAST scan run: PASS / FAIL / FINDINGS:
+[ ] HoundDog scan run: PASS / FAIL / FINDINGS:
+Blocking findings: [ ] NONE  [ ] YES — (list)
+
+---
+
+## 10. Open Items Carried Forward
+(Items not resolved this session — must be added to tiers/tier3/.open_items)
+
+---
+
+## 11. NPS-PROTOCOL.md Updated
+[ ] New session report added to Tier 3
+[ ] New core files added to Tier 5
+[ ] New accepted findings added to Tier 4
+[ ] Open items updated
+
+---
+
+## 12. Session Verification Checklist (§10)
+[ ] Backups exist and are valid
+[ ] Git state recorded
+[ ] Explicit approval obtained and documented
+[ ] Code functions correctly — no errors present
+[ ] Phase 5 Review completed and passed
+[ ] Progress report filed (this document)
+[ ] NPS-PROTOCOL.md updated
+
+SESSION CLOSED BY:
+TIMESTAMP:
