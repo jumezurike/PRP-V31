@@ -97,89 +97,92 @@ Other nps_gate.sh commands:
 ---
 
 ## Architecture Overview
-┌─────────────────────────────────────────────────────────────────┐
-│ PRP v3.1 ENFORCEMENT STACK │
-├─────────────────────────────────────────────────────────────────┤
-│ SESSION START │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ NPS GATE (§30) │ │
-│ │ "Non-Markovian Property Startup" │ ◄── LOCKED │
-│ │ Wrong callsign / no callsign? │ │
-│ │ → "Awaiting NPS callsign." EXIT. │ │
-│ │ Correct callsign? │ │
-│ │ → Read Tier 1 (Governance) │ │
-│ │ → Read Tier 2 (Technical Reference) │ │
-│ │ → Read Tier 3 (Session History, new→old) │ │
-│ │ → Read Tier 4 (Security Baseline) │ │
-│ │ → Read Tier 5 (Live Code) │ │
-│ │ → Write NPS audit file │ │
-│ │ → Declare NPS COMPLETE │ ◄── UNLOCKED │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ ANALYSIS GATE (§2) │ │
-│ │ Problem Genesis → Root Cause → │ │
-│ │ Solution Roadmap (with STRIDE + NFR) │ │
-│ │ No implementation until analysis done. │ │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ APPROVAL GATE (§2) │ │
-│ │ "approved" or "proceed" — exact words. │ │
-│ │ "go ahead", "sounds good" = NOT approval. │ │
-│ │ No other phrase works. No exceptions. │ │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ BACKUP GATE (§3) │ │
-│ │ Backup created → verified readable → │ │
-│ │ baseline recorded. │ │
-│ │ No backup = no file modification. Ever. │ │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ IMPLEMENTATION (§4) │ │
-│ │ Approved plan ONLY. │ │
-│ │ No unapproved changes. Ever. │ │
-│ │ Milestone backups at 25/50/75%. │ │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ REVIEW GATE (§5) │ │
-│ │ Correctness · Security · Consistency · │ │
-│ │ Test coverage · No credentials · Supply │ │
-│ │ chain verified. │ │
-│ │ Work is incomplete until review passes. │ │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ DELIVERY GATE (§6 + §22.6) │ │
-│ │ THREE SCANNERS — run in parallel: │ │
-│ │ 1. Dependency audit (npm/pip/Snyk) │ │
-│ │ 2. SAST scan │ │
-│ │ 3. HoundDog (secrets/credentials) │ │
-│ │ ANY Critical/High finding = HALT. │ │
-│ │ NON-OVERRIDABLE. │ │
-│ └─────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ DOCUMENTATION GATE (§7) │ │
-│ │ Progress report filed. │ │
-│ │ NPS-PROTOCOL.md updated. │ │
-│ │ Session closed. │ │
-│ └─────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
 
-text
+```
+╔═════════════════════════════════════════════════════════════╗
+║              PRP v3.1 ENFORCEMENT STACK                     ║
+║                   SESSION START                             ║
+╚═════════════════════════════════════════════════════════════╝
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  NPS GATE  (§30)                              [LOCKED]      │
+│  ─────────────────────────────────────────────────────────  │
+│  Callsign: "Non-Markovian Property Startup"                 │
+│  Wrong / missing → "Awaiting NPS callsign."  EXIT.         │
+│  Correct →                                                  │
+│    → Read Tier 1  (Governance)                              │
+│    → Read Tier 2  (Technical Reference)                     │
+│    → Read Tier 3  (Session History, newest → oldest)        │
+│    → Read Tier 4  (Security Baseline)                       │
+│    → Read Tier 5  (Live Code)                               │
+│    → Write NPS audit file                                   │
+│    → Declare NPS COMPLETE                     [UNLOCKED]    │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  ANALYSIS GATE  (§2)                                        │
+│  ─────────────────────────────────────────────────────────  │
+│  Problem Genesis → Root Cause →                             │
+│  Solution Roadmap (with STRIDE + NFR)                       │
+│  No implementation until analysis is complete.              │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  APPROVAL GATE  (§2)                                        │
+│  ─────────────────────────────────────────────────────────  │
+│  Valid triggers:  "approved"  |  "proceed"  — exact words.  │
+│  "go ahead", "sounds good", "ok" = NOT approval.            │
+│  No other phrase accepted.  No exceptions.                  │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  BACKUP GATE  (§3)                                          │
+│  ─────────────────────────────────────────────────────────  │
+│  Backup created → verified readable → baseline recorded.    │
+│  No backup = no file modification.  Ever.                   │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  IMPLEMENTATION  (§4)                                       │
+│  ─────────────────────────────────────────────────────────  │
+│  Approved plan ONLY.  No unapproved changes.  Ever.         │
+│  Milestone backups at 25% / 50% / 75%.                      │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  REVIEW GATE  (§5)                                          │
+│  ─────────────────────────────────────────────────────────  │
+│  Correctness · Security · Consistency · Test coverage       │
+│  No credentials · Supply chain verified.                    │
+│  Work is incomplete until review passes.                    │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  DELIVERY GATE  (§6 + §22.6)                                │
+│  ─────────────────────────────────────────────────────────  │
+│  THREE SCANNERS — run in parallel:                          │
+│    1. Dependency audit  (npm / pip / Snyk)                  │
+│    2. SAST scan                                             │
+│    3. HoundDog  (secrets / credentials)                     │
+│  ANY Critical or High finding = HALT.  NON-OVERRIDABLE.     │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  DOCUMENTATION GATE  (§7)                                   │
+│  ─────────────────────────────────────────────────────────  │
+│  Progress report filed.                                     │
+│  NPS-PROTOCOL.md updated.                                   │
+│  Session closed.                                            │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
