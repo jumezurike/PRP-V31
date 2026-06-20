@@ -86,12 +86,42 @@ This has been proven insufficient. **Violation 3 (2026-04-17):** an agent began 
 │                             │  │                                │
 │  No callsign /              │  │  NPS complete + within 1hr     │
 │  session expired            │  │                                │
-└─────────────────────────────┘  └────────────────────────────────┘
+└─────────────────────────────┘  └──────────────┬─────────────────┘
+                                                │ before committing
+                                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 4 — approval_gate.sh + stage_for_approval.sh               │
+│  No edit ships without explicit Protocol Owner sign-off          │
+│                                                                 │
+│  ┌──────────────────┐    ┌──────────────────┐                  │
+│  │ approval_gate.sh │ →  │ stage_for_         │                  │
+│  │ --request        │    │ approval.sh        │                  │
+│  │ logs + STOPS      │    │ writes             │                  │
+│  └──────────────────┘    │ .local/approval.txt│                  │
+│         │                 │ from `git add`     │                  │
+│  human types              │ STOPS              │                  │
+│  "approved" in chat        └──────────────────┘                  │
+│         │                          │                              │
+│         ▼                          ▼                              │
+│  ┌──────────────────┐    Protocol Owner flips STATUS to          │
+│  │ approval_gate.sh │    APPROVED, signs UWA in the file          │
+│  │ --grant           │                                            │
+│  │ writes sentinel   │                                            │
+│  └──────────────────┘                                            │
+│         │                                                         │
+│         ▼                                                         │
+│  Edits / commit now permitted                                    │
+└─────────────────────────────────────────────────────────────────┘
 
 Other nps_gate.sh commands:
   status     — check lock state
   reset      — end session
   force-lock — emergency block all work
+
+Other approval_gate.sh commands:
+  --status   — check whether a commit is currently permitted
+  --log      — view the full approval audit trail
+  --clear    — emergency manual reset of the sentinel
 ```
 
 ---
@@ -136,6 +166,7 @@ Other nps_gate.sh commands:
 │  Valid triggers:  "approved"  |  "proceed"  — exact words.  │
 │  "go ahead", "sounds good", "ok" = NOT approval.            │
 │  No other phrase accepted.  No exceptions.                  │
+│  Enforced by: approval_gate.sh + stage_for_approval.sh       │
 └─────────────────────────────┬───────────────────────────────┘
                               │
                               ▼
@@ -370,7 +401,7 @@ Quick Start
 bash
 git clone https://github.com/jumezurike/PRP-V31.git
 cd PRP-V31
-chmod +x scripts/nps_gate.sh scripts/nps_work_gate.sh scripts/setup_nps_tiers.sh
+chmod +x scripts/nps_gate.sh scripts/nps_work_gate.sh scripts/setup_nps_tiers.sh scripts/approval_gate.sh scripts/stage_for_approval.sh
 bash scripts/setup_nps_tiers.sh
 2. Populate your tier directories
 text
