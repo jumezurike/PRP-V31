@@ -241,6 +241,112 @@ $ bash scripts/nps_gate.sh force-lock
 $ bash scripts/nps_work_gate.sh python my_script.py
 ✗  WORK BLOCKED — PRP v3.1 §30 VIOLATION
    Per §11: All work performed before NPS COMPLETE is invalid.
+```
+
+---
+
+## The Approval Gate — PRP v3.1 §2
+
+NPS proves the agent has read the history. The Approval Gate proves the agent
+isn't *acting* on its own judgment — every change is proposed, then stopped,
+until the Protocol Owner gives explicit sign-off. "Go ahead," "sounds good,"
+and "ok" do not count. Only an explicit grant — recorded by running the
+script below — counts as approval.
+
+There are two complementary scripts:
+
+- **`approval_gate.sh`** — for proposing and approving a *change* before any
+  edits are made. Tracks the request/grant cycle with a single-use sentinel
+  file and a full audit log.
+- **`stage_for_approval.sh`** — for the moment just before a *commit*. It
+  reads whatever you've already run `git add` on, writes the exact file list
+  to `.local/approval.txt`, and stops. The Protocol Owner reviews the list,
+  flips the status to `APPROVED`, signs with their UWA, and only then does
+  the agent commit.
+
+### How to use the new gate going forward
+
+```bash
+# 1. Agent proposes a change — logs it and stops
+bash scripts/approval_gate.sh --request "description of what I want to do"
+
+# 2. You say "approved" in chat
+
+# 3. Agent writes the sentinel, then makes edits
+bash scripts/approval_gate.sh --grant "description"
+
+# 4. View the audit trail any time
+bash scripts/approval_gate.sh --log
+```
+
+### Approval Gate Commands
+
+```bash
+# Request — logs and stops, awaiting approval
+$ bash scripts/approval_gate.sh --request "refactor auth module to use JWT"
+╔══════════════════════════════════════════════════════════╗
+║   APPROVAL GATE — CHANGE REQUEST LOGGED                 ║
+╠══════════════════════════════════════════════════════════╣
+║  refactor auth module to use JWT                        ║
+╠══════════════════════════════════════════════════════════╣
+║  Awaiting Protocol Owner approval in chat.              ║
+║  Agent is STOPPED.                                      ║
+║  Run --grant once the owner says approved.              ║
+╚══════════════════════════════════════════════════════════╝
+
+# Grant — only after the owner has typed "approved" or "proceed"
+$ bash scripts/approval_gate.sh --grant "refactor auth module to use JWT"
+╔══════════════════════════════════════════════════════════╗
+║   APPROVAL GATE — CHANGE APPROVED                       ║
+╠══════════════════════════════════════════════════════════╣
+║  Sentinel written. One commit permitted.                ║
+╚══════════════════════════════════════════════════════════╝
+
+# Status — check whether a commit is currently permitted
+$ bash scripts/approval_gate.sh --status
+
+# Full audit log
+$ bash scripts/approval_gate.sh --log
+
+# Emergency manual reset
+$ bash scripts/approval_gate.sh --clear
+```
+
+### Pre-Commit File Review
+
+```bash
+# Stage your files first
+$ git add scripts/nps_gate.sh README.md
+
+# Then generate the human-reviewable approval file
+$ bash scripts/stage_for_approval.sh
+╔══════════════════════════════════════════════════════╗
+║  ✋  HUMAN APPROVAL REQUIRED — PRP v3.1 Gate         ║
+╠══════════════════════════════════════════════════════╣
+║  Approval file written to: .local/approval.txt       ║
+║                                                      ║
+║  Agent is STOPPED. Next steps for Protocol Owner:   ║
+║  1. Open .local/approval.txt                         ║
+║  2. Review the staged file list                      ║
+║  3. Change STATUS to APPROVED                        ║
+║  4. Sign with your UWA                               ║
+║  5. Tell the agent to commit                         ║
+╚══════════════════════════════════════════════════════╝
+```
+
+`.local/approval.txt` is never committed — it's a local, human-in-the-loop
+checkpoint between staging and committing. The Protocol Owner edits the file
+directly: changing `STATUS: AWAITING_APPROVAL` to `STATUS: APPROVED` and
+signing the `UWA:` line is the only way a commit is authorized to proceed.
+
+> **Note:** the header comment in `approval_gate.sh` references a pre-commit
+> hook that automatically checks and clears the `.approval_granted` sentinel
+> after a successful commit. That hook is not yet included in this repo — add
+> one under `.git/hooks/pre-commit` (or a tracked equivalent) if you want the
+> sentinel cleared automatically rather than manually via `--clear`.
+
+---
+
 PRSM v1.1 — Positional Risk Scoring Module
 Every PRP enforcement verdict produces a quantitative score:
 

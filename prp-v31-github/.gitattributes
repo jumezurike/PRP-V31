@@ -1,0 +1,11 @@
+# Force LF line endings for shell scripts regardless of OS
+# This prevents CRLF errors when scripts run on Mac/Linux
+*.sh text eol=lf
+
+# Keep markdown and other text files normalized too
+*.md text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
+
+# Don't touch binary files
+*.png binary

@@ -1,6 +1,13 @@
 # NPS gate state — reset each session, not tracked
 .nps_state
 
+# Approval gate sentinel + log — scripts/.approval_granted, scripts/.approval_log
+scripts/.approval_granted
+scripts/.approval_log
+
+# stage-for-approval.sh output — local only, never commit
+.local/
+
 # Audit files generated — track them (audit trail)
 # docs/nps-audits/  ← DO NOT ignore
 
