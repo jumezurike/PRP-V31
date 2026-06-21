@@ -4,8 +4,6 @@
 **LokDon Development Framework · Lancaster University**  
 **Protocol Owner: Josiah Umezurike**
 
-| PRP Version | License | NPS Gate | OWASP | LLM |
-
 ---
 
 ## The Problem
@@ -378,48 +376,70 @@ signing the `UWA:` line is the only way a commit is authorized to proceed.
 
 ---
 
-PRSM v1.1 — Positional Risk Scoring Module
+---
+
+## PRSM v1.1 — Positional Risk Scoring Module
+
 Every PRP enforcement verdict produces a quantitative score:
 
-text
+```
 PRSM = PE × CW × (1 + IGAF) × CF
+```
 
-PE   — Positional Exposure    (0.0–1.0)  How reachable is the threat?
-CW   — Chain Weight           (0.0–1.0)  How complete is the attack chain?
-IGAF — Identity Grain Anomaly (0.0–1.0+) Is ECSMID operating correctly?
-CF   — PRP Compliance Factor  (0 or 1)   CF=0 means work is INVALID. Score=0.
-Band	Score	Response
-INVALID	CF=0	Revert all work. Restart from §1.
-HIGH	>0.70	Mandatory §26 Incident Response
-MEDIUM	0.40–0.70	STRIDE update + RPL policy review
-LOW	0.20–0.40	Document in threat register
-MINIMAL	<0.20	Standard monitoring
+| Factor | Range | Meaning |
+|--------|-------|---------|
+| **PE** — Positional Exposure | 0.0–1.0 | How reachable is the threat? |
+| **CW** — Chain Weight | 0.0–1.0 | How complete is the attack chain? |
+| **IGAF** — Identity Grain Anomaly | 0.0–1.0+ | Is ECSMID operating correctly? |
+| **CF** — PRP Compliance Factor | 0 or 1 | CF=0 means work is INVALID. Score=0. |
+
+| Band | Score | Response |
+|------|-------|----------|
+| INVALID | CF=0 | Revert all work. Restart from §1. |
+| HIGH | >0.70 | Mandatory §26 Incident Response |
+| MEDIUM | 0.40–0.70 | STRIDE update + RPL policy review |
+| LOW | 0.20–0.40 | Document in threat register |
+| MINIMAL | <0.20 | Standard monitoring |
+
 A violated work product has a PRSM score of zero. The score is a gate, not a dashboard.
 
-Quick Start
-1. Clone and initialise
-bash
+---
+
+## Quick Start
+
+### 1. Clone and initialise
+
+```bash
 git clone https://github.com/jumezurike/PRP-V31.git
 cd PRP-V31
 chmod +x scripts/nps_gate.sh scripts/nps_work_gate.sh scripts/setup_nps_tiers.sh scripts/approval_gate.sh scripts/stage_for_approval.sh
 bash scripts/setup_nps_tiers.sh
-2. Populate your tier directories
-text
+```
+
+### 2. Populate your tier directories
+
+```
 tiers/
 ├── tier1/    ← Your governance documents (PRP, roles, violation table)
 ├── tier2/    ← Architecture, STRIDE model, NFR baseline
 ├── tier3/    ← Session history reports (added each session close)
 ├── tier4/    ← Accepted security findings, open CVEs, PRSM scores
 └── tier5/    ← Live code references, project state
-3. Start every session with the gate
-bash
+```
+
+### 3. Start every session with the gate
+
+```bash
 # Reset from previous session
 bash scripts/nps_gate.sh reset
 
 # Provide callsign to begin
 bash scripts/nps_gate.sh "Non-Markovian Property Startup"
-4. Wrap all work commands
-bash
+```
+
+### 4. Wrap all work commands
+
+```bash
 # Any command blocked until NPS complete
 bash scripts/nps_work_gate.sh <your command>
 
@@ -430,8 +450,11 @@ bash scripts/nps_work_gate.sh git push origin main
 
 # Dry-run (logs without executing)
 bash scripts/nps_work_gate.sh --log-only dangerous_command.sh
-5. Close every session
-bash
+```
+
+### 5. Close every session
+
+```bash
 # Fill in session report template
 # Save as tiers/tier3/JU_DEV_YYYYMMDD_HHMM_PR.txt
 
@@ -440,44 +463,72 @@ bash
 
 # Reset gate for next session
 bash scripts/nps_gate.sh reset
-The Five Tiers
-Tier	Name	Contents	Read Order
-1	Governance	PRP document, roles, violation table	First — establishes law
-2	Technical Reference	Architecture, STRIDE model, NFR baseline	Second — establishes context
-3	Session History	All prior session progress reports	Third — newest to oldest
-4	Security Baseline	Accepted findings, open CVEs, PRSM scores	Fourth — establishes known risk
-5	Live Code	Current project state, key files	Fifth — establishes current reality
-Framework Alignment
-Framework	PRP v3.1 Coverage
-OWASP LLM Top 10	All 10 categories covered — §21, §22, §23, §14
-MITRE ATLAS	All tactics covered — §23 STRIDE, §26 incident response
-NIST AI RMF	GOVERN/MAP/MEASURE/MANAGE — PRSM scoring aligns exactly
-Cambridge Taxonomy	Safety/Security/Privacy/Reliability/Resilience — §1–30
-HIPAA/HITECH	§19 PHI governance — full compliance standard
-GDPR	§14 RPL + §19 + LINDDUN privacy threat model
-What PRP v3.1 Governs
-Section	Gate	Cannot Be Bypassed
-§2	Analysis	No implementation without approved roadmap
-§3	Backup	No file modification without verified backup
-§4	Implementation	Approved plan only — no unapproved changes
-§5	Review	Work incomplete until review passes
-§6+§22.6	Delivery	Three scanners — Critical/High = halt
-§7	Documentation	No session closure without progress report
-§11	Violations	Automatic consequences — no discretion
-§14	RPL	Sensitive data never in code/logs/prompts
-§21.7	AI Restrictions	AI cannot self-approve, merge, or access production
-§23	STRIDE	Mandatory before any implementation
-§24	Branch/PR	AI cannot serve as reviewer or approve merges
-§30	NPS Gate	Callsign required — structurally enforced
-Environment Variables
-Variable	Default	Description
-NPS_TTL_SECONDS	3600	Session timeout in seconds (1 hour)
-bash
+```
+
+---
+
+## The Five Tiers
+
+| Tier | Name | Contents | Read Order |
+|------|------|----------|------------|
+| 1 | Governance | PRP document, roles, violation table | First — establishes law |
+| 2 | Technical Reference | Architecture, STRIDE model, NFR baseline | Second — establishes context |
+| 3 | Session History | All prior session progress reports | Third — newest to oldest |
+| 4 | Security Baseline | Accepted findings, open CVEs, PRSM scores | Fourth — establishes known risk |
+| 5 | Live Code | Current project state, key files | Fifth — establishes current reality |
+
+---
+
+## Framework Alignment
+
+| Framework | PRP v3.1 Coverage |
+|-----------|-------------------|
+| OWASP LLM Top 10 | All 10 categories covered — §21, §22, §23, §14 |
+| MITRE ATLAS | All tactics covered — §23 STRIDE, §26 incident response |
+| NIST AI RMF | GOVERN / MAP / MEASURE / MANAGE — PRSM scoring aligns exactly |
+| Cambridge Taxonomy | Safety / Security / Privacy / Reliability / Resilience — §1–30 |
+| HIPAA / HITECH | §19 PHI governance — full compliance standard |
+| GDPR | §14 RPL + §19 + LINDDUN privacy threat model |
+
+---
+
+## What PRP v3.1 Governs
+
+| Section | Gate | Cannot Be Bypassed |
+|---------|------|---------------------|
+| §2 | Analysis | No implementation without approved roadmap |
+| §3 | Backup | No file modification without verified backup |
+| §4 | Implementation | Approved plan only — no unapproved changes |
+| §5 | Review | Work incomplete until review passes |
+| §6 + §22.6 | Delivery | Three scanners — Critical/High = halt |
+| §7 | Documentation | No session closure without progress report |
+| §11 | Violations | Automatic consequences — no discretion |
+| §14 | RPL | Sensitive data never in code/logs/prompts |
+| §21.7 | AI Restrictions | AI cannot self-approve, merge, or access production |
+| §23 | STRIDE | Mandatory before any implementation |
+| §24 | Branch/PR | AI cannot serve as reviewer or approve merges |
+| §30 | NPS Gate | Callsign required — structurally enforced |
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|--------------|
+| `NPS_TTL_SECONDS` | `3600` | Session timeout in seconds (1 hour) |
+
+```bash
 # Override session TTL (e.g., 8 hour workday)
 export NPS_TTL_SECONDS=28800
 bash scripts/nps_gate.sh "Non-Markovian Property Startup"
-Licence
-LokDon Open Enforcement Licence
+```
+
+---
+
+## Licence
+
+**LokDon Open Enforcement Licence**
+
 This protocol and its enforcement tools may be:
 
 ✅ Adopted by any organisation
@@ -485,27 +536,32 @@ This protocol and its enforcement tools may be:
 ✅ Deployed commercially
 ✅ Extended with additional sections
 
-With one non-negotiable condition:
+**With one non-negotiable condition:**
 
-Enforcement principles must not be weakened.
+> Enforcement principles must not be weakened.
 
 The backup gate, the approval gate, the delivery scan gate, and the NPS startup lock are structural. Remove them and you have reverted to an honour system that has already been proven to fail.
 
-Attribution: Josiah Umezurike, LokDon / Lancaster University, 2026
+**Attribution:** Josiah Umezurike, LokDon / Lancaster University, 2026
 
-Authors
-Josiah Johnson Umezurike — Protocol Owner, LokDon Security Research
+---
 
-Dr Ignatius Ezeani — Lancaster University
+## Authors
 
-🌐 b2b.lokdon.com
+- **Josiah Johnson Umezurike** — Protocol Owner, LokDon Security Research
+- **Dr Ignatius Ezeani** — Lancaster University
 
-Related Work
-LFKI: OKT-Native Photonic AI Compute Fabric — The architecture whose Non-Markovian traversal property inspired the NPS gate
+🌐 [b2b.lokdon.com](https://b2b.lokdon.com)
 
-ECSMID / DataShieldAI — The mandated cryptographic APIs (§15)
+---
 
-PRSM v1.1 — Positional Risk Scoring Module (included in full PRP v3.1 document)
+## Related Work
 
-"PRP v3.1 is mandatory. No exceptions."
-— Josiah Umezurike, Protocol Owner
+- **LFKI: OKT-Native Photonic AI Compute Fabric** — The architecture whose Non-Markovian traversal property inspired the NPS gate
+- **ECSMID / DataShieldAI** — The mandated cryptographic APIs (§15)
+- **PRSM v1.1 — Positional Risk Scoring Module** (included in full PRP v3.1 document)
+
+---
+
+> *"PRP v3.1 is mandatory. No exceptions."*
+> — Josiah Umezurike, Protocol Owner
